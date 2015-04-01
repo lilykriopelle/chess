@@ -1,5 +1,6 @@
 require_relative 'board.rb'
 require_relative 'human_player.rb'
+require_relative 'computer_player.rb'
 require 'yaml'
 
 class Game
@@ -32,7 +33,13 @@ class Game
     until ended_in_checkmate?|| ended_in_stalemate?
       puts "\n#{player.name.capitalize}'s turn."
       @board.display
-      start_pos, end_pos = handle_input(player.color)
+
+      if player.is_a?(HumanPlayer)
+        start_pos, end_pos = handle_input(player.color)
+      elsif player.is_a?(ComputerPlayer)
+        start_pos, end_pos = player.generate_move(@board)
+      end
+
       @board.move(player.color, start_pos, end_pos)
       player == @player1 ? player = @player2 : player = @player1
       save
@@ -79,15 +86,20 @@ private
   end
 
   def get_move
-    puts "Where do you want to move from?"
+    begin
+      puts "Where do you want to move from?"
+      coords = gets.chomp.split("")
+      raise IOError.new "Please enter a letter followed by a number" if coords.empty?
+      start_pos = [coords.last.to_i - 1, COL[coords.first.upcase]]
 
-    coords = gets.chomp.split("")
-    start_pos = [coords.last.to_i - 1, COL[coords.first.upcase]]
-
-    puts "Where do you want to move to?"
-    coords = gets.chomp.split("")
-    end_pos = [coords.last.to_i - 1, COL[coords.first.upcase]]
-
+      puts "Where do you want to move to?"
+      coords = gets.chomp.split("")
+      raise IOError.new "Please enter a letter followed by a number" if coords.empty?
+      end_pos = [coords.last.to_i - 1, COL[coords.first.upcase]]
+    rescue IOError => e
+      puts e
+      retry
+    end
     [start_pos, end_pos]
   end
 
@@ -112,11 +124,11 @@ if __FILE__ == $PROGRAM_NAME
   else
     puts "Who is playing white?"
     name = gets.chomp
-    player1 = HumanPlayer.new(name, :white)
+    player1 = ComputerPlayer.new(name, :white)
 
     puts "Who is playing black?"
     name = gets.chomp
-    player2 = HumanPlayer.new(name, :black)
+    player2 = ComputerPlayer.new(name, :black)
 
     Game.new(player1, player2)
   end

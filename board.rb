@@ -1,5 +1,6 @@
 Dir["./pieces/*.rb"].each {|file| require file }
 require 'colorize'
+require 'byebug'
 
 class Board
 
@@ -29,12 +30,14 @@ class Board
   def in_check?(color)
     king = pieces(color).find { |piece| piece.is_a?(King) }
 
+    byebug if king.nil?
     pieces(opponent(color)).any? do |opponent|
       opponent.reachable_squares.include?(king.pos)
     end
   end
 
   def [](pos)
+    raise if !in_bounds?(pos)
     @grid[pos.first][pos.last]
   end
 
@@ -54,6 +57,15 @@ class Board
     end
 
     new_board
+  end
+
+  def pieces(color)
+    all_pieces.select { |piece| piece.color == color }
+  end
+
+  def in_bounds?(pos)
+    x, y = pos
+    x.between?(0, 7) && y.between?(0, 7)
   end
 
   private
@@ -79,10 +91,6 @@ class Board
 
     def all_pieces
       @grid.flatten.compact
-    end
-
-    def pieces(color)
-      all_pieces.select { |piece| piece.color == color }
     end
 
     def populate_row(row, color)

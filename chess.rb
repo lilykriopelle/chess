@@ -30,7 +30,7 @@ class Game
     puts "To load an in-progress game, run:"
     puts "ruby chess.rb chess-#{@player1.name}-v-#{@player2.name}.yml"
 
-    until ended_in_checkmate?|| ended_in_stalemate?
+    until ended_in_checkmate?|| ended_in_stalemate? || draw?
       puts "\n#{player.name.capitalize}'s turn."
       @board.display
 
@@ -60,7 +60,13 @@ private
       puts "\nCheckmate! #{player.name.capitalize} loses."
     elsif ended_in_stalemate?
       puts "\nStalemate! Nobody wins."
+    elsif draw?
+      puts "\nDraw! Nobody wins."
     end
+  end
+
+  def draw?
+    @board.moves_since_pawn >= 50
   end
 
   def ended_in_stalemate?

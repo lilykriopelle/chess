@@ -3,12 +3,14 @@ require 'colorize'
 require 'byebug'
 
 class Board
+  attr_accessor :moves_since_pawn
 
   PIECES = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
 
   def initialize(place_new_pieces = true)
     @grid = Array.new(8){Array.new(8)}
     place_pieces if place_new_pieces
+    @moves_since_pawn = 0
   end
 
   def move(color, start_pos, end_pos)
@@ -71,6 +73,7 @@ class Board
   private
 
     def update_board_state(piece, start_pos, end_pos)
+      piece.is_a?(Pawn) ? @moves_since_pawn = 0 : @moves_since_pawn += 1
       piece.pos = end_pos
       self[end_pos] = piece
       self[start_pos] = nil
